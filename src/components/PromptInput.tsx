@@ -26,9 +26,9 @@ export default function PromptInput({
   maxLength = 4000,
   className = '',
   suggestions = [
-    'What is your main tech stack?',
-    'How many years of experience?',
-    'Which industries have you worked in?',
+    'What is your work experience?',
+    'What is your tech stack and skill set?',
+    'What is your educational background?',
   ],
 }: PromptInputProps) {
   const [value, setValue] = useState<string>(controlledValue ?? '')
