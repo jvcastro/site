@@ -16,8 +16,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'John Vincent Castro',
-  description: 'Who is John Vincent Castro, a tech savvy engineer.',
+  title: 'John Vincent Castro | Personal Website',
+  description:
+    'Personal website of John Vincent Castro, a software engineer. Learn about my experience, skills, and background.',
 }
 
 export const viewport = {
