@@ -151,9 +151,6 @@ export default function Home() {
                 <Typewriter
                   onInit={(typewriter) => {
                     typewriter
-                      .typeString('Do you want to know more about me?')
-                      .pauseFor(500)
-                      .deleteAll()
                       .typeString('Ask me anything.')
                       .pauseFor(500)
                       .deleteAll()
