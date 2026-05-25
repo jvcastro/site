@@ -98,10 +98,10 @@ export default function Home() {
   )
 
   return (
-    <div className="bg-background text-foreground flex h-dvh flex-col overflow-hidden">
+    <div className="ambient-bg text-foreground relative flex h-dvh flex-col overflow-hidden">
       <ThemeToggle />
 
-      <header className="mx-auto w-full max-w-5xl shrink-0 px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
+      <header className="relative z-10 mx-auto w-full max-w-5xl shrink-0 px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
         <div className="flex flex-col items-center gap-3">
           <Image
             src="/vince-ai.png"
@@ -139,7 +139,7 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col overflow-hidden px-4 sm:px-6 lg:px-8">
+      <section className="relative z-10 mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col overflow-hidden px-4 sm:px-6 lg:px-8">
         <div className="flex min-h-0 flex-1 flex-col items-center overflow-hidden">
           {!hasStartedChat && (
             <div className="flex min-h-0 flex-1 items-center justify-center">

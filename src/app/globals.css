@@ -9,6 +9,9 @@
   --surface: #ffffff;
   --border: #e5e7eb;
   --accent-subtle: #f3f4f6;
+  --glow-primary: rgba(99, 102, 241, 0.28);
+  --glow-secondary: rgba(14, 165, 233, 0.22);
+  --grid-dot: rgba(99, 102, 241, 0.09);
 }
 
 .dark {
@@ -18,6 +21,9 @@
   --surface: #1a1d21;
   --border: #2a2f36;
   --accent-subtle: rgba(255, 255, 255, 0.05);
+  --glow-primary: rgba(99, 102, 241, 0.15);
+  --glow-secondary: rgba(56, 189, 248, 0.1);
+  --grid-dot: rgba(255, 255, 255, 0.035);
 }
 
 @theme inline {
@@ -41,4 +47,22 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.ambient-bg {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 80% 65% at 8% -10%, var(--glow-primary), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 98% 110%, var(--glow-secondary), transparent 55%),
+    radial-gradient(var(--grid-dot) 1px, transparent 1px);
+  background-size: auto, auto, 28px 28px;
+}
+
+.dark .ambient-bg {
+  background-image:
+    radial-gradient(ellipse 70% 55% at 15% -5%, var(--glow-primary), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 95% 105%, var(--glow-secondary), transparent 50%),
+    radial-gradient(circle at 50% 40%, transparent 0%, var(--background) 72%),
+    radial-gradient(var(--grid-dot) 1px, transparent 1px);
+  background-size: auto, auto, auto, 28px 28px;
 }
