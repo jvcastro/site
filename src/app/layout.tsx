@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import { getPersonJsonLd, siteConfig } from '@/config/site'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import 'highlight.js/styles/github-dark.css'
 import './globals.css'
 
 const geistSans = Geist({
@@ -15,10 +17,27 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
+const { name, seo } = siteConfig
+
 export const metadata: Metadata = {
-  title: 'John Vincent Castro | Personal Website',
-  description:
-    'Personal website of John Vincent Castro, a software engineer. Learn about my experience, skills, and background.',
+  metadataBase: new URL(seo.siteUrl),
+  title: `${name} | Personal Website`,
+  description: seo.description,
+  openGraph: {
+    title: `${name} | Personal Website`,
+    description: seo.description,
+    url: seo.siteUrl,
+    siteName: name,
+    images: [{ url: seo.ogImage, width: 512, height: 512, alt: name }],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${name} | Personal Website`,
+    description: seo.description,
+    images: [seo.ogImage],
+  },
 }
 
 export const viewport = {
@@ -33,6 +52,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const personJsonLd = getPersonJsonLd()
+
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
@@ -41,6 +62,10 @@ export default function RootLayout({
         <Script id="theme-init" strategy="beforeInteractive">
           {themeInitScript}
         </Script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
         <ThemeProvider>{children}</ThemeProvider>
         <Analytics />
       </body>

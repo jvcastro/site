@@ -27,3 +27,22 @@ export type DifyChatResponse = {
   conversation_id: string
   message_id: string
 }
+
+export type DifyStreamEvent = {
+  event: string
+  answer?: string
+  conversation_id?: string
+  message_id?: string
+  message?: string
+}
+
+export type ClientStreamMeta = {
+  conversationId: string
+  messageId: string
+}
+
+export type ClientStreamEvent =
+  | { type: 'chunk'; text: string }
+  | { type: 'meta'; data: ClientStreamMeta }
+  | { type: 'error'; message: string }
+  | { type: 'done' }

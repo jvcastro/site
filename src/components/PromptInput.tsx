@@ -25,11 +25,7 @@ export default function PromptInput({
   showSuggestions = true,
   maxLength = 4000,
   className = '',
-  suggestions = [
-    'What is your work experience?',
-    'What is your tech stack and skill set?',
-    'What is your educational background?',
-  ],
+  suggestions = [],
 }: PromptInputProps) {
   const [value, setValue] = useState<string>(controlledValue ?? '')
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
@@ -82,7 +78,7 @@ export default function PromptInput({
 
   return (
     <div className={`flex w-full max-w-2xl flex-col gap-2 ${className}`}>
-      {showSuggestions && (
+      {showSuggestions && suggestions.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {suggestions.map((s) => (
             <button
@@ -90,7 +86,7 @@ export default function PromptInput({
               type="button"
               onClick={() => insertSuggestion(s)}
               disabled={isDisabled}
-              className="cursor-pointer rounded-full border border-border bg-accent-subtle px-3 py-2 text-xs text-foreground/80 transition hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50 sm:py-1.5"
+              className="border-border bg-accent-subtle font-mono cursor-pointer rounded-full border px-3 py-2 text-xs text-foreground/80 transition hover:bg-foreground/10 disabled:cursor-not-allowed disabled:opacity-50 sm:py-1.5"
             >
               {s}
             </button>
@@ -98,7 +94,7 @@ export default function PromptInput({
         </div>
       )}
 
-      <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <div className="border-border bg-surface rounded-2xl border p-4 shadow-sm">
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
             <textarea
@@ -115,10 +111,13 @@ export default function PromptInput({
               rows={1}
             />
 
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <div className="mt-auto flex items-center gap-2 text-xs text-muted">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 text-xs text-muted">
                 <span>
                   {currentLength}/{maxLength}
+                </span>
+                <span className="font-mono hidden sm:inline">
+                  Enter to send · Shift+Enter for newline
                 </span>
               </div>
 
@@ -139,7 +138,7 @@ export default function PromptInput({
                   type="button"
                   onClick={submitCurrent}
                   disabled={isDisabled || currentLength === 0}
-                  className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-border bg-accent-subtle px-4 py-2 text-sm text-foreground/90 shadow-sm transition hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-foreground/20 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  className="btn-accent inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm transition focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isLoading ? 'Sending...' : 'Send'}
                 </button>

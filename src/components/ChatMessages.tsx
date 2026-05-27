@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import CopyButton from '@/components/CopyButton'
+import MarkdownMessage from '@/components/MarkdownMessage'
 import type { ChatMessage } from '@/types/chat'
 
 type ChatMessagesProps = {
@@ -47,32 +49,32 @@ export default function ChatMessages({
         </div>
       )}
 
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain">
+      <div
+        aria-live="polite"
+        aria-relevant="additions text"
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain"
+      >
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed break-words sm:text-base ${
-                message.role === 'user'
-                  ? 'bg-foreground/10 text-foreground/90'
-                  : 'border border-border bg-surface text-foreground/80'
-              }`}
-            >
-              {message.content}
-            </div>
+            {message.role === 'user' ? (
+              <div className="bg-foreground/10 text-foreground/90 max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed break-words sm:text-base">
+                {message.content}
+              </div>
+            ) : (
+              <div className="border-border bg-surface/80 relative max-w-[85%] rounded-2xl border border-l-[3px] border-l-indigo-500/70 px-4 py-3 text-sm leading-relaxed break-words backdrop-blur-sm sm:text-base">
+                <MarkdownMessage content={message.content} />
+                {message.content.trim() && (
+                  <div className="mt-2 flex justify-end">
+                    <CopyButton text={message.content} />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ))}
-
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="rounded-2xl border border-border bg-surface px-4 py-3 text-sm text-muted">
-              <span>Thinking</span>
-              <span className="inline-flex w-6 animate-pulse">...</span>
-            </div>
-          </div>
-        )}
 
         <div ref={bottomRef} />
       </div>

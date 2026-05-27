@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
-import type {
-  ChatErrorResponse,
-  ChatRequestBody,
-  ChatSuccessResponse,
-  DifyChatResponse,
-} from '@/types/chat'
+import {
+  encodeSseEvent,
+  parseDifyStream,
+} from '@/lib/parse-dify-stream'
+import type { ChatErrorResponse, ChatRequestBody } from '@/types/chat'
 
 const MAX_QUERY_LENGTH = 4000
 const DEFAULT_DIFY_BASE_URL = 'https://api.dify.ai/v1'
@@ -44,8 +43,10 @@ export async function POST(request: Request) {
     return jsonError('Chat service is not configured.', 500)
   }
 
+  let difyResponse: Response
+
   try {
-    const difyResponse = await fetch(`${baseUrl}/chat-messages`, {
+    difyResponse = await fetch(`${baseUrl}/chat-messages`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -54,30 +55,106 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         inputs: {},
         query,
-        response_mode: 'blocking',
+        response_mode: 'streaming',
         conversation_id: body.conversationId ?? '',
         user: userId,
       }),
-    })
-
-    if (!difyResponse.ok) {
-      console.error('Dify API error:', difyResponse.status, difyResponse.statusText)
-      return jsonError('Unable to get a response right now. Please try again.', 502)
-    }
-
-    const data = (await difyResponse.json()) as DifyChatResponse
-
-    if (!data.answer) {
-      return jsonError('Received an empty response. Please try again.', 502)
-    }
-
-    return NextResponse.json<ChatSuccessResponse>({
-      answer: data.answer,
-      conversationId: data.conversation_id,
-      messageId: data.message_id,
     })
   } catch (error) {
     console.error('Chat API error:', error)
     return jsonError('Something went wrong. Please try again.', 502)
   }
+
+  if (!difyResponse.ok || !difyResponse.body) {
+    console.error(
+      'Dify API error:',
+      difyResponse.status,
+      difyResponse.statusText,
+    )
+    return jsonError('Unable to get a response right now. Please try again.', 502)
+  }
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder()
+
+      try {
+        let conversationId = body.conversationId ?? ''
+        let messageId = ''
+        let sentMeta = false
+
+        for await (const event of parseDifyStream(difyResponse.body!)) {
+          if (event.event === 'error') {
+            controller.enqueue(
+              encoder.encode(
+                encodeSseEvent('error', {
+                  message:
+                    event.message ?? 'Unable to get a response right now.',
+                }),
+              ),
+            )
+            break
+          }
+
+          if (event.conversation_id) {
+            conversationId = event.conversation_id
+          }
+
+          if (event.message_id) {
+            messageId = event.message_id
+          }
+
+          if (!sentMeta && conversationId && messageId) {
+            sentMeta = true
+            controller.enqueue(
+              encoder.encode(
+                encodeSseEvent('meta', { conversationId, messageId }),
+              ),
+            )
+          }
+
+          if (
+            (event.event === 'message' || event.event === 'agent_message') &&
+            event.answer
+          ) {
+            controller.enqueue(
+              encoder.encode(encodeSseEvent('chunk', { text: event.answer })),
+            )
+          }
+
+          if (event.event === 'message_end') {
+            if (!sentMeta && conversationId && messageId) {
+              controller.enqueue(
+                encoder.encode(
+                  encodeSseEvent('meta', { conversationId, messageId }),
+                ),
+              )
+            }
+            break
+          }
+        }
+
+        controller.enqueue(encoder.encode(encodeSseEvent('done', {})))
+      } catch (error) {
+        console.error('Stream proxy error:', error)
+        controller.enqueue(
+          encoder.encode(
+            encodeSseEvent('error', {
+              message: 'Something went wrong. Please try again.',
+            }),
+          ),
+        )
+      } finally {
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+    },
+  })
 }
